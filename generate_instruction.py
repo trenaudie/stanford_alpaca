@@ -1,3 +1,5 @@
+# %%
+
 """
 batch_selfinstruct_generate.py
 
@@ -23,7 +25,7 @@ import utils
 
 import fire
 
-
+# %% 
 def encode_prompt(prompt_instructions):
     """Encode multiple prompt instructions into a single string."""
     prompt = open("./prompt.txt").read() + "\n"
@@ -110,8 +112,8 @@ def find_word_in_string(w, s):
 def generate_instruction_following_data(
     output_dir="./",
     seed_tasks_path="./seed_tasks.jsonl",
-    num_instructions_to_generate=100,
-    model_name="text-davinci-003",
+    num_instructions_to_generate=3,
+    model_name="gpt-3.5-turbo-1106",
     num_prompt_instructions=3,
     request_batch_size=5,
     temperature=1.0,
@@ -212,6 +214,18 @@ def generate_instruction_following_data(
 def main(task, **kwargs):
     globals()[task](**kwargs)
 
+# %% 
 
 if __name__ == "__main__":
+    from configparser import ConfigParser
+    config = ConfigParser()
+    from pathlib import Path
+    ROOT_DIR = filter(lambda p: p.name.endswith("topic_modeling"), Path(".").absolute().parents).__next__()
+    print(f"ROOT_DIR: {ROOT_DIR}")
+    config.read(ROOT_DIR / "config.ini")
+    print(f"openai api key {config.get('openai', 'OPENAI_API_KEY')}")
+    os.environ["OPENAI_API_KEY"] = config.get("openai", "OPENAI_API_KEY")
+
     fire.Fire(main)
+
+# %%

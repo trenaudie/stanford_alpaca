@@ -1,0 +1,9 @@
+You are a financial analyst. You are given words from a corporate news article. 
+Your task is to give the topic that they relate to.
+Example:
+Words: blaze, containment, burn area, forest fire, evacuation orders, smoke inhalation, warning 
+Topic: Wildfire
+Words: deluge, flooding, overflow, evacuation, rescue, rainfall, river, flash flood, relief efforts, water level, drowning 
+Topic: Floods
+What is the topic for: 
+Words:

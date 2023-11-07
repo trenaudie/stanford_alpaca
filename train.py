@@ -108,7 +108,6 @@ def _tokenize_fn(strings: Sequence[str], tokenizer: transformers.PreTrainedToken
         labels_lens=labels_lens,
     )
 
-
 def preprocess(
     sources: Sequence[str],
     targets: Sequence[str],
@@ -121,6 +120,7 @@ def preprocess(
     labels = copy.deepcopy(input_ids)
     for label, source_len in zip(labels, sources_tokenized["input_ids_lens"]):
         label[:source_len] = IGNORE_INDEX
+    
     return dict(input_ids=input_ids, labels=labels)
 
 
@@ -161,6 +161,7 @@ class DataCollatorForSupervisedDataset(object):
 
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
         input_ids, labels = tuple([instance[key] for instance in instances] for key in ("input_ids", "labels"))
+        # pad the end of the sequence to "longest" in batch
         input_ids = torch.nn.utils.rnn.pad_sequence(
             input_ids, batch_first=True, padding_value=self.tokenizer.pad_token_id
         )
@@ -182,7 +183,6 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, dat
 def train():
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
@@ -212,7 +212,10 @@ def train():
     )
 
     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
+    from transformers.models.llama.modeling_llama import LlamaForCausalLM
+
     trainer = Trainer(model=model, tokenizer=tokenizer, args=training_args, **data_module)
+    trainer.callback_handler.remove_callback(transformers.integrations.NeptuneCallback)
     trainer.train()
     trainer.save_state()
     trainer.save_model(output_dir=training_args.output_dir)

@@ -46,7 +46,7 @@ def openai_completion(
     max_batches=sys.maxsize,
     return_text=False,
     **decoding_kwargs,
-) -> Union[Union[StrOrOpenAIObject], Sequence[StrOrOpenAIObject], Sequence[Sequence[StrOrOpenAIObject]],]:
+):
     """Decode with OpenAI API.
 
     Args:
@@ -103,7 +103,7 @@ def openai_completion(
                     **batch_decoding_args.__dict__,
                     **decoding_kwargs,
                 )
-                completion_batch = openai.Completion.create(prompt=prompt_batch, **shared_kwargs)
+                completion_batch = openai.ChatCompletion.create(prompt=prompt_batch, **shared_kwargs)
                 choices = completion_batch.choices
 
                 for choice in choices:
